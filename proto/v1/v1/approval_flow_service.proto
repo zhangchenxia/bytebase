@@ -1,0 +1,186 @@
+syntax = "proto3";
+
+package bytebase.v1;
+
+import "v1/sensitive_data_service.proto";
+
+option go_package = "generated-go/v1";
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "v1/common.proto";
+
+// ApprovalFlowService provides methods for managing approval flows for sensitive data changes.
+service ApprovalFlowService {
+  // GetApprovalConfig returns the approval configuration for sensitive data changes.
+  rpc GetApprovalConfig(GetApprovalConfigRequest) returns (ApprovalConfig) {
+    option (google.api.http) = {
+      get: "/api/v1/approval-config"
+    };
+  }
+
+  // UpdateApprovalConfig updates the approval configuration for sensitive data changes.
+  rpc UpdateApprovalConfig(UpdateApprovalConfigRequest) returns (ApprovalConfig) {
+    option (google.api.http) = {
+      patch: "/api/v1/approval-config"
+      body: "config"
+    };
+  }
+
+  // ListApprovalRecords returns a list of approval records for sensitive data changes.
+  rpc ListApprovalRecords(ListApprovalRecordsRequest) returns (ListApprovalRecordsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/approval-records"
+    };
+  }
+
+  // GetApprovalRecord returns a specific approval record for sensitive data changes.
+  rpc GetApprovalRecord(GetApprovalRecordRequest) returns (ApprovalRecord) {
+    option (google.api.http) = {
+      get: "/api/v1/{name=approval-records/*}"
+    };
+  }
+
+  // ApproveRecord approves an approval record for sensitive data changes.
+  rpc ApproveRecord(ApproveRecordRequest) returns (ApprovalRecord) {
+    option (google.api.http) = {
+      post: "/api/v1/{name=approval-records/*}:approve"
+      body: "*"
+    };
+  }
+
+  // RejectRecord rejects an approval record for sensitive data changes.
+  rpc RejectRecord(RejectRecordRequest) returns (ApprovalRecord) {
+    option (google.api.http) = {
+      post: "/api/v1/{name=approval-records/*}:reject"
+      body: "*"
+    };
+  }
+}
+
+// ApprovalFlow represents the sequence of approvals required.
+message ApprovalFlow {
+  // List of role names that must approve, in order. Format: roles/{role}.
+  repeated string roles = 1;
+}
+
+// ApprovalConfig represents the approval configuration for sensitive data changes.
+message ApprovalConfig {
+  // The name of the approval configuration. Format: approval-config.
+  string name = 1;
+  // The approval flow for low sensitivity data changes.
+  ApprovalFlow low_sensitivity_flow = 2;
+  // The approval flow for medium sensitivity data changes.
+  ApprovalFlow medium_sensitivity_flow = 3;
+  // The approval flow for high sensitivity data changes.
+  ApprovalFlow high_sensitivity_flow = 4;
+  // Whether this configuration is enabled for the workspace.
+  bool enabled = 5;
+  // Output only. The time when this configuration was created.
+  int64 create_time = 6;
+  // Output only. The time when this configuration was last updated.
+  int64 update_time = 7;
+}
+
+// ApprovalRecord represents the approval record for a sensitive data change.
+message ApprovalRecord {
+  // The name of the approval record. Format: approval-records/{record}.
+  string name = 1;
+  // The resource name of the issue this approval record belongs to. Format: projects/{project}/issues/{issue}.
+  string issue = 2;
+  // The sensitivity level of the data being changed.
+  SensitiveDataLevel sensitivity_level = 3;
+  // The list of sensitive fields being changed.
+  repeated string sensitive_fields = 4;
+  // The current approval status.
+  ApprovalStatus status = 5;
+  // The list of approval steps taken for this record.
+  repeated ApprovalStep steps = 6;
+  // Output only. The time when this approval record was created.
+  int64 create_time = 7;
+  // Output only. The time when this approval record was last updated.
+  int64 update_time = 8;
+}
+
+// ApprovalStatus represents the status of an approval.
+enum ApprovalStatus {
+  APPROVAL_STATUS_UNSPECIFIED = 0;
+  // Approval is pending.
+  PENDING = 1;
+  // Approval has been approved.
+  APPROVED = 2;
+  // Approval has been rejected.
+  REJECTED = 3;
+}
+
+// ApprovalStep represents a single step in an approval process.
+message ApprovalStep {
+  // The ID of the approval step.
+  int32 step_id = 1;
+  // The role name that was required for this step. Format: roles/{role}.
+  string role = 2;
+  // The resource name of the user who approved or rejected this step. Format: users/{user}.
+  string user = 3;
+  // The status of this approval step.
+  ApprovalStatus status = 4;
+  // The reason provided for approving or rejecting this step.
+  string reason = 5;
+  // Output only. The time when this approval step was created.
+  int64 create_time = 6;
+  // Output only. The time when this approval step was last updated.
+  int64 update_time = 7;
+}
+
+// GetApprovalConfigRequest is the request message for GetApprovalConfig.
+message GetApprovalConfigRequest {
+  // The name of the approval configuration. Format: approval-config.
+  string name = 1;
+}
+
+// UpdateApprovalConfigRequest is the request message for UpdateApprovalConfig.
+message UpdateApprovalConfigRequest {
+  // The approval configuration to update.
+  ApprovalConfig config = 1;
+  // The update mask applies to the resource.
+  google.protobuf.FieldMask update_mask = 2;
+}
+
+// ListApprovalRecordsRequest is the request message for ListApprovalRecords.
+message ListApprovalRecordsRequest {
+  // The parent resource name. Format: projects/{project} or projects/{project}/issues/{issue}.
+  string parent = 1;
+  // The maximum number of results to return per page.
+  int32 page_size = 2;
+  // The page token received from a previous ListApprovalRecords call.
+  string page_token = 3;
+}
+
+// ListApprovalRecordsResponse is the response message for ListApprovalRecords.
+message ListApprovalRecordsResponse {
+  // The list of approval records.
+  repeated ApprovalRecord records = 1;
+  // A token to retrieve next page of results.
+  string next_page_token = 2;
+}
+
+// GetApprovalRecordRequest is the request message for GetApprovalRecord.
+message GetApprovalRecordRequest {
+  // The name of the approval record. Format: approval-records/{record}.
+  string name = 1;
+}
+
+// ApproveRecordRequest is the request message for ApproveRecord.
+message ApproveRecordRequest {
+  // The name of the approval record to approve. Format: approval-records/{record}.
+  string name = 1;
+  // The reason for approving the record (optional).
+  string reason = 2;
+}
+
+// RejectRecordRequest is the request message for RejectRecord.
+message RejectRecordRequest {
+  // The name of the approval record to reject. Format: approval-records/{record}.
+  string name = 1;
+  // The reason for rejecting the record (required).
+  string reason = 2;
+}

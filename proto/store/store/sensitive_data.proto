@@ -1,0 +1,84 @@
+syntax = "proto3";
+
+package bytebase.store;
+
+option go_package = "generated-go/store";
+
+// SensitiveDataLevel represents the sensitivity level of data.
+enum SensitiveDataLevel {
+  SENSITIVE_DATA_LEVEL_UNSPECIFIED = 0;
+  // Low sensitivity data, no approval required.
+  SENSITIVE_DATA_LEVEL_LOW = 1;
+  // Medium sensitivity data, 1-level approval required.
+  SENSITIVE_DATA_LEVEL_MEDIUM = 2;
+  // High sensitivity data, 2-level approval required.
+  SENSITIVE_DATA_LEVEL_HIGH = 3;
+}
+
+// SensitiveDataRule represents a rule for identifying sensitive data.
+message SensitiveDataRule {
+  // The ID of the sensitive data rule.
+  int32 id = 1;
+  // The UID of the sensitive data rule.
+  string uid = 2;
+  // The title of the sensitive data rule.
+  string title = 3;
+  // The description of the sensitive data rule.
+  string description = 4;
+  // The sensitivity level of the data matched by this rule.
+  SensitiveDataLevel level = 5;
+  // The list of field names to match (exact match).
+  repeated string field_names = 6;
+  // The list of data types to match (exact match).
+  repeated string data_types = 7;
+  // The regular expression to match against field values.
+  string regex_pattern = 8;
+  // The ID of the project this rule belongs to (0 for workspace-level).
+  int32 project_id = 9;
+  // The ID of the database this rule belongs to (0 for all databases).
+  int32 database_id = 10;
+  // The name of the table this rule belongs to (empty for all tables).
+  string table_name = 11;
+  // Whether this rule is enabled.
+  bool enabled = 12;
+  // The ID of the user who created this rule.
+  int32 creator_id = 13;
+  // The ID of the user who last updated this rule.
+  int32 updater_id = 14;
+  // The time when this rule was created.
+  int64 created_ts = 15;
+  // The time when this rule was last updated.
+  int64 updated_ts = 16;
+}
+
+// SensitiveDataField represents a field identified as sensitive data.
+message SensitiveDataField {
+  // The ID of the sensitive data field.
+  int32 id = 1;
+  // The UID of the sensitive data field.
+  string uid = 2;
+  // The ID of the project this field belongs to.
+  int32 project_id = 3;
+  // The ID of the database this field belongs to.
+  int32 database_id = 4;
+  // The name of the table this field belongs to.
+  string table_name = 5;
+  // The name of the field.
+  string field_name = 6;
+  // The data type of the field.
+  string data_type = 7;
+  // The sensitivity level of the field.
+  SensitiveDataLevel level = 8;
+  // The list of rule IDs that matched this field.
+  repeated int32 matched_rule_ids = 9;
+  // Whether this field is enabled for sensitivity checking.
+  bool enabled = 10;
+  // The ID of the user who created this field.
+  int32 creator_id = 11;
+  // The ID of the user who last updated this field.
+  int32 updater_id = 12;
+  // The time when this field was created.
+  int64 created_ts = 13;
+  // The time when this field was last updated.
+  int64 updated_ts = 14;
+}
