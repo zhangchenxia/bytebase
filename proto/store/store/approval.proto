@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package bytebase.store;
 
+import "store/sensitive_data.proto";
+
 option go_package = "generated-go/store";
 
 // IssuePayloadApproval records the approval template used and approval history for an issue.
@@ -57,3 +59,59 @@ message ApprovalFlow {
   // List of role names that must approve, in order.
   repeated string roles = 1;
 }
+
+// SensitiveDataApprovalConfig represents the approval configuration for sensitive data changes.
+message SensitiveDataApprovalConfig {
+  // The approval flow for low sensitivity data changes.
+  ApprovalFlow low_sensitivity_flow = 1;
+  // The approval flow for medium sensitivity data changes.
+  ApprovalFlow medium_sensitivity_flow = 2;
+  // The approval flow for high sensitivity data changes.
+  ApprovalFlow high_sensitivity_flow = 3;
+  // Whether this configuration is enabled for the workspace.
+  bool enabled = 4;
+  // The ID of the user who created this configuration.
+  int32 creator_id = 5;
+  // The ID of the user who last updated this configuration.
+  int32 updater_id = 6;
+  // The time when this configuration was created.
+  int64 created_ts = 7;
+  // The time when this configuration was last updated.
+  int64 updated_ts = 8;
+}
+
+// SensitiveDataApprovalRecord represents the approval record for a sensitive data change.
+message SensitiveDataApprovalRecord {
+  // The ID of the approval record.
+  int32 id = 1;
+  // The UID of the approval record.
+  string uid = 2;
+  // The ID of the issue this approval record belongs to.
+  int32 issue_id = 3;
+  // The sensitivity level of the data being changed.
+  SensitiveDataLevel sensitivity_level = 4;
+  // The list of sensitive fields being changed.
+  repeated string sensitive_fields = 5;
+  // The current approval status.
+  ApprovalStatus status = 6;
+  // The ID of the user who created this approval record.
+  int32 creator_id = 7;
+  // The ID of the user who last updated this approval record.
+  int32 updater_id = 8;
+  // The time when this approval record was created.
+  int64 created_ts = 9;
+  // The time when this approval record was last updated.
+  int64 updated_ts = 10;
+}
+
+// ApprovalStatus represents the status of an approval.
+enum ApprovalStatus {
+  APPROVAL_STATUS_UNSPECIFIED = 0;
+  // Approval is pending.
+  PENDING = 1;
+  // Approval has been approved.
+  APPROVED = 2;
+  // Approval has been rejected.
+  REJECTED = 3;
+}
+
