@@ -27,6 +27,7 @@ import (
 	metricapi "github.com/bytebase/bytebase/backend/metric"
 	"github.com/bytebase/bytebase/backend/plugin/metric"
 	"github.com/bytebase/bytebase/backend/runner/metricreport"
+	"github.com/bytebase/bytebase/backend/service"
 	"github.com/bytebase/bytebase/backend/store"
 	"github.com/bytebase/bytebase/backend/utils"
 )
@@ -41,6 +42,47 @@ type IssueService struct {
 	profile        *config.Profile
 	iamManager     *iam.Manager
 	metricReporter *metricreport.Reporter
+	sensitiveDataService *service.SensitiveDataService
+}
+
+// canExecuteIssue checks if an issue can be executed based on sensitive data approval status
+func (s *IssueService) canExecuteIssue(ctx context.Context, issue *storepb.Issue) error {
+	// Only check database change issues
+	if issue.Type != storepb.IssueType_ISSUE_TYPE_DATABASE_CHANGE {
+		return nil
+	}
+
+	// Check if the issue has a sensitive data approval flow
+	approvalFlows, err := s.store.ListApprovalFlows(ctx, fmt.Sprintf("projects/%s", issue.Project))
+	if err != nil {
+		return connect.NewError(connect.CodeInternal, errors.Errorf("failed to list approval flows: %v", err))
+	}
+
+	var issueApprovalFlow *v1pb.ApprovalFlow
+	for _, flow := range approvalFlows {
+		if strings.Contains(flow.Name, fmt.Sprintf("issues/%s", issue.Name)) {
+			issueApprovalFlow = flow
+			break
+		}
+	}
+
+	// If no approval flow, no need to check
+	if issueApprovalFlow == nil {
+		return nil
+	}
+
+	// Check approval flow status
+	switch issueApprovalFlow.Status {
+	case v1pb.ApprovalFlow_STATUS_PENDING:
+		return connect.NewError(connect.CodeFailedPrecondition, errors.Errorf("issue requires approval before execution"))
+	case v1pb.ApprovalFlow_STATUS_REJECTED:
+		return connect.NewError(connect.CodeFailedPrecondition, errors.Errorf("issue has been rejected and cannot be executed"))
+	case v1pb.ApprovalFlow_STATUS_APPROVED:
+		// Approval is granted, can execute
+		return nil
+	default:
+		return connect.NewError(connect.CodeFailedPrecondition, errors.Errorf("invalid approval flow status: %s", issueApprovalFlow.Status))
+	}
 }
 
 type filterIssueMessage struct {
@@ -58,6 +100,7 @@ func NewIssueService(
 	profile *config.Profile,
 	iamManager *iam.Manager,
 	metricReporter *metricreport.Reporter,
+	sensitiveDataService *service.SensitiveDataService,
 ) *IssueService {
 	return &IssueService{
 		store:          store,
@@ -67,6 +110,7 @@ func NewIssueService(
 		profile:        profile,
 		iamManager:     iamManager,
 		metricReporter: metricReporter,
+		sensitiveDataService: sensitiveDataService,
 	}
 }
 
@@ -468,6 +512,36 @@ func (s *IssueService) createIssueDatabaseChange(ctx context.Context, request *v
 			return nil, connect.NewError(connect.CodeNotFound, errors.Errorf("rollout %d not found in project %s", rolloutID, projectID))
 		}
 		rolloutUID = &pipeline.ID
+	}
+
+	// Evaluate sensitive data change
+	if s.sensitiveDataService != nil {
+		// Get the SQL content from the plan
+		var sqlContent string
+		if plan.Spec != nil && plan.Spec.Content != nil {
+			sqlContent = plan.Spec.Content.Query
+		}
+		if sqlContent != "" {
+			// Evaluate the sensitive data change
+			resp, err := s.sensitiveDataService.EvaluateSensitiveDataChange(ctx, &v1pb.EvaluateSensitiveDataChangeRequest{
+				Parent: request.Parent,
+				Change: &v1pb.SensitiveDataChange{
+					Sql: sqlContent,
+				},
+				Database: &v1pb.Database{
+					Name: project.Name,
+				},
+			})
+			if err != nil {
+				return nil, connect.NewError(connect.CodeInternal, errors.Errorf("failed to evaluate sensitive data change, error: %v", err))
+			}
+			// If the change affects sensitive data, we need to set the approval status
+			if resp.AffectsSensitiveData {
+				// TODO: Set the approval template based on the sensitive level
+				// For now, we'll just log the sensitive data change
+				log.Ctx(ctx).Info("Sensitive data change detected", slog.String("sql", sqlContent), slog.String("sensitive_level", resp.HighestSensitiveLevel.String()))
+			}
+		}
 	}
 
 	issueCreateMessage := &store.IssueMessage{

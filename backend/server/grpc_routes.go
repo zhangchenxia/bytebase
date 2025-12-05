@@ -34,6 +34,7 @@ import (
 	"github.com/bytebase/bytebase/backend/generated-go/v1/v1connect"
 	"github.com/bytebase/bytebase/backend/runner/metricreport"
 	"github.com/bytebase/bytebase/backend/runner/schemasync"
+	"github.com/bytebase/bytebase/backend/service"
 	"github.com/bytebase/bytebase/backend/store"
 )
 
@@ -82,7 +83,10 @@ func configureGrpcRouters(
 	identityProviderService := apiv1.NewIdentityProviderService(stores, licenseService)
 	instanceRoleService := apiv1.NewInstanceRoleService(stores, dbFactory)
 	instanceService := apiv1.NewInstanceService(stores, profile, licenseService, metricReporter, stateCfg, dbFactory, schemaSyncer, iamManager, sampleInstanceManager)
-	issueService := apiv1.NewIssueService(stores, webhookManager, stateCfg, licenseService, profile, iamManager, metricReporter)
+	// Create sensitive data service
+	sensitiveDataService := service.NewSensitiveDataService(stores)
+	// Create issue service with sensitive data service
+	issueService := apiv1.NewIssueService(stores, webhookManager, stateCfg, licenseService, profile, iamManager, metricReporter, sensitiveDataService)
 	orgPolicyService := apiv1.NewOrgPolicyService(stores, licenseService)
 	planService := apiv1.NewPlanService(stores, sheetManager, licenseService, dbFactory, stateCfg, profile, iamManager)
 	projectService := apiv1.NewProjectService(stores, profile, iamManager, licenseService)
@@ -90,7 +94,7 @@ func configureGrpcRouters(
 	reviewConfigService := apiv1.NewReviewConfigService(stores, licenseService)
 	revisionService := apiv1.NewRevisionService(stores)
 	roleService := apiv1.NewRoleService(stores, iamManager, licenseService)
-	rolloutService := apiv1.NewRolloutService(stores, sheetManager, licenseService, dbFactory, stateCfg, webhookManager, profile, iamManager)
+	rolloutService := apiv1.NewRolloutService(stores, sheetManager, licenseService, dbFactory, stateCfg, webhookManager, profile, iamManager, sensitiveDataService)
 	settingService := apiv1.NewSettingService(stores, profile, licenseService, stateCfg)
 	sheetService := apiv1.NewSheetService(stores, sheetManager, licenseService, iamManager, profile)
 	sqlService := apiv1.NewSQLService(stores, sheetManager, schemaSyncer, dbFactory, licenseService, profile, iamManager)

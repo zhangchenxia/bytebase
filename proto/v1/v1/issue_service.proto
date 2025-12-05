@@ -13,6 +13,7 @@ import "google/protobuf/timestamp.proto";
 import "google/type/expr.proto";
 import "v1/annotation.proto";
 import "v1/common.proto";
+import "v1/setting_service.proto";
 
 option go_package = "github.com/bytebase/bytebase/backend/generated-go/v1";
 
@@ -473,6 +474,123 @@ message Issue {
   ApprovalStatus approval_status = 24 [(google.api.field_behavior) = OUTPUT_ONLY];
   // Only populated when approval_status == ERROR
   string approval_status_error = 25 [(google.api.field_behavior) = OUTPUT_ONLY];
+
+  // The sensitive data level of the issue.
+  // This field is populated when the issue involves sensitive data changes.
+  RiskLevel sensitive_data_level = 26 [(google.api.field_behavior) = OUTPUT_ONLY];
+
+  // The list of sensitive fields involved in this issue.
+  // Each entry contains information about the sensitive field that is being changed.
+  repeated SensitiveFieldChange sensitive_field_changes = 27 [(google.api.field_behavior) = OUTPUT_ONLY];
+
+  // The approval flow for this issue, specifically for sensitive data changes.
+  // This field is populated when the issue requires sensitive data approval.
+  ApprovalFlow sensitive_data_approval_flow = 28 [(google.api.field_behavior) = OUTPUT_ONLY];
+}
+
+// SensitiveFieldChange represents a change to a sensitive field in the database.
+message SensitiveFieldChange {
+  // The full name of the database table containing the sensitive field.
+  // Format: instances/{instance}/databases/{database}/tables/{table}
+  string table = 1 [(google.api.field_behavior) = REQUIRED];
+
+  // The name of the sensitive field.
+  string field = 2 [(google.api.field_behavior) = REQUIRED];
+
+  // The sensitive data level of this field.
+  RiskLevel sensitive_level = 3 [(google.api.field_behavior) = REQUIRED];
+
+  // The semantic type of the sensitive field (e.g., PASSWORD, PHONE_NUMBER, BANK_CARD).
+  SemanticType semantic_type = 4 [(google.api.field_behavior) = REQUIRED];
+
+  // The type of change being made to the sensitive field (e.g., ADD, MODIFY, DELETE).
+  enum ChangeType {
+    // Unspecified change type.
+    CHANGE_TYPE_UNSPECIFIED = 0;
+    // Adding a new sensitive field.
+    ADD = 1;
+    // Modifying an existing sensitive field.
+    MODIFY = 2;
+    // Deleting an existing sensitive field.
+    DELETE = 3;
+    // Updating data in a sensitive field.
+    UPDATE_DATA = 4;
+  }
+  ChangeType change_type = 5 [(google.api.field_behavior) = REQUIRED];
+}
+
+// ApprovalFlow represents the approval flow for a sensitive data change.
+message ApprovalFlow {
+  // The unique identifier for the approval flow.
+  string name = 1 [(google.api.field_behavior) = REQUIRED];
+
+  // The current step in the approval flow.
+  int32 current_step = 2 [(google.api.field_behavior) = OUTPUT_ONLY];
+
+  // The total number of steps in the approval flow.
+  int32 total_steps = 3 [(google.api.field_behavior) = OUTPUT_ONLY];
+
+  // The list of approval steps in the flow.
+  repeated ApprovalStep steps = 4 [(google.api.field_behavior) = REQUIRED];
+
+  // The list of approval records for this flow.
+  repeated ApprovalRecord records = 5 [(google.api.field_behavior) = OUTPUT_ONLY];
+}
+
+// ApprovalStep represents a single step in the approval flow.
+message ApprovalStep {
+  // The step number (starting from 1).
+  int32 step = 1 [(google.api.field_behavior) = REQUIRED];
+
+  // The approvers for this step.
+  // Format: users/{email} or roles/{role}
+  repeated string approvers = 2 [(google.api.field_behavior) = REQUIRED];
+
+  // The type of approval required for this step.
+  enum ApprovalType {
+    // Unspecified approval type.
+    APPROVAL_TYPE_UNSPECIFIED = 0;
+    // Any one approver from the list must approve.
+    ANY = 1;
+    // All approvers from the list must approve.
+    ALL = 2;
+  }
+  ApprovalType approval_type = 3 [(google.api.field_behavior) = REQUIRED];
+
+  // The deadline for this approval step.
+  google.protobuf.Timestamp deadline = 4;
+}
+
+// ApprovalRecord represents a record of an approval action.
+message ApprovalRecord {
+  // The unique identifier for the approval record.
+  string name = 1 [(google.api.field_behavior) = OUTPUT_ONLY];
+
+  // The step number this approval record corresponds to.
+  int32 step = 2 [(google.api.field_behavior) = REQUIRED];
+
+  // The principal who performed the approval action.
+  // Format: users/{email}
+  string approver = 3 [(google.api.field_behavior) = REQUIRED];
+
+  // The action taken by the approver.
+  enum Action {
+    // Unspecified action.
+    ACTION_UNSPECIFIED = 0;
+    // Approve the issue.
+    APPROVE = 1;
+    // Reject the issue.
+    REJECT = 2;
+    // Request changes to the issue.
+    REQUEST_CHANGES = 3;
+  }
+  Action action = 4 [(google.api.field_behavior) = REQUIRED];
+
+  // The comment provided by the approver (if any).
+  string comment = 5;
+
+  // The time when the approval action was performed.
+  google.protobuf.Timestamp create_time = 6 [(google.api.field_behavior) = OUTPUT_ONLY];
 }
 
 message GrantRequest {
