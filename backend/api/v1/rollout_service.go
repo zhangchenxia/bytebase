@@ -1063,6 +1063,46 @@ func GetValidRolloutPolicyForEnvironment(ctx context.Context, stores *store.Stor
 	return policy, nil
 }
 
+// canExecuteIssue checks if an issue can be executed based on sensitive data approval status
+func (s *RolloutService) canExecuteIssue(ctx context.Context, issue *store.IssueMessage) error {
+	// Only check database change issues
+	if issue.Type != storepb.Issue_DATABASE_CHANGE {
+		return nil
+	}
+
+	// Check if the issue has a sensitive data approval flow
+	approvalFlows, err := s.store.ListApprovalFlows(ctx, fmt.Sprintf("projects/%s", issue.ProjectID))
+	if err != nil {
+		return connect.NewError(connect.CodeInternal, errors.Errorf("failed to list approval flows: %v", err))
+	}
+
+	var issueApprovalFlow *v1pb.ApprovalFlow
+	for _, flow := range approvalFlows {
+		if strings.Contains(flow.Name, fmt.Sprintf("issues/%s", issue.Name)) {
+			issueApprovalFlow = flow
+			break
+		}
+	}
+
+	// If no approval flow, no need to check
+	if issueApprovalFlow == nil {
+		return nil
+	}
+
+	// Check approval flow status
+	switch issueApprovalFlow.Status {
+	case v1pb.ApprovalFlow_STATUS_PENDING:
+		return connect.NewError(connect.CodeFailedPrecondition, errors.Errorf("issue requires approval before execution"))
+	case v1pb.ApprovalFlow_STATUS_REJECTED:
+		return connect.NewError(connect.CodeFailedPrecondition, errors.Errorf("issue has been rejected and cannot be executed"))
+	case v1pb.ApprovalFlow_STATUS_APPROVED:
+		// Approval is granted, can execute
+		return nil
+	default:
+		return connect.NewError(connect.CodeFailedPrecondition, errors.Errorf("invalid approval flow status: %s", issueApprovalFlow.Status))
+	}
+}
+
 // canUserRunEnvironmentTasks returns if a user can run the tasks in an environment.
 func (s *RolloutService) canUserRunEnvironmentTasks(ctx context.Context, user *store.UserMessage, project *store.ProjectMessage, issue *store.IssueMessage, environment string, _ int) (bool, error) {
 	// For data export issues, only the creator can run tasks.

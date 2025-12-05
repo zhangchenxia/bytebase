@@ -1,0 +1,479 @@
+syntax = "proto3";
+
+package bytebase.v1;
+
+import "google/api/annotations.proto";
+import "google/api/client.proto";
+import "google/api/field_behavior.proto";
+import "google/api/resource.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/field_mask.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/bytebase/bytebase/backend/generated-go/v1";
+option java_multiple_files = true;
+option java_outer_classname = "SensitiveDataServiceProto";
+option java_package = "com.bytebase.v1";
+
+// SensitiveDataService provides APIs for managing sensitive data classification and approval workflows.
+service SensitiveDataService {
+  // ListSensitiveDataRules lists all sensitive data rules in a project.
+  rpc ListSensitiveDataRules(ListSensitiveDataRulesRequest) returns (ListSensitiveDataRulesResponse) {
+    option (google.api.http) = {
+      get: "/v1/{parent=projects/*}/sensitiveDataRules"
+    };
+    option (google.api.method_signature) = "parent";
+  }
+
+  // GetSensitiveDataRule gets a specific sensitive data rule.
+  rpc GetSensitiveDataRule(GetSensitiveDataRuleRequest) returns (SensitiveDataRule) {
+    option (google.api.http) = {
+      get: "/v1/{name=projects/*/sensitiveDataRules/*}"
+    };
+    option (google.api.method_signature) = "name";
+  }
+
+  // CreateSensitiveDataRule creates a new sensitive data rule.
+  rpc CreateSensitiveDataRule(CreateSensitiveDataRuleRequest) returns (SensitiveDataRule) {
+    option (google.api.http) = {
+      post: "/v1/{parent=projects/*}/sensitiveDataRules"
+      body: "rule"
+    };
+    option (google.api.method_signature) = "parent,rule";
+  }
+
+  // UpdateSensitiveDataRule updates an existing sensitive data rule.
+  rpc UpdateSensitiveDataRule(UpdateSensitiveDataRuleRequest) returns (SensitiveDataRule) {
+    option (google.api.http) = {
+      patch: "/v1/{rule.name=projects/*/sensitiveDataRules/*}"
+      body: "rule"
+    };
+    option (google.api.method_signature) = "rule,update_mask";
+  }
+
+  // DeleteSensitiveDataRule deletes a sensitive data rule.
+  rpc DeleteSensitiveDataRule(DeleteSensitiveDataRuleRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/v1/{name=projects/*/sensitiveDataRules/*}"
+    };
+    option (google.api.method_signature) = "name";
+  }
+
+  // ListApprovalFlows lists all approval flows in a project.
+  rpc ListApprovalFlows(ListApprovalFlowsRequest) returns (ListApprovalFlowsResponse) {
+    option (google.api.http) = {
+      get: "/v1/{parent=projects/*}/approvalFlows"
+    };
+    option (google.api.method_signature) = "parent";
+  }
+
+  // GetApprovalFlow gets a specific approval flow.
+  rpc GetApprovalFlow(GetApprovalFlowRequest) returns (ApprovalFlow) {
+    option (google.api.http) = {
+      get: "/v1/{name=projects/*/approvalFlows/*}"
+    };
+    option (google.api.method_signature) = "name";
+  }
+
+  // CreateApprovalFlow creates a new approval flow.
+  rpc CreateApprovalFlow(CreateApprovalFlowRequest) returns (ApprovalFlow) {
+    option (google.api.http) = {
+      post: "/v1/{parent=projects/*}/approvalFlows"
+      body: "flow"
+    };
+    option (google.api.method_signature) = "parent,flow";
+  }
+
+  // UpdateApprovalFlow updates an existing approval flow.
+  rpc UpdateApprovalFlow(UpdateApprovalFlowRequest) returns (ApprovalFlow) {
+    option (google.api.http) = {
+      patch: "/v1/{flow.name=projects/*/approvalFlows/*}"
+      body: "flow"
+    };
+    option (google.api.method_signature) = "flow,update_mask";
+  }
+
+  // DeleteApprovalFlow deletes an approval flow.
+  rpc DeleteApprovalFlow(DeleteApprovalFlowRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/v1/{name=projects/*/approvalFlows/*}"
+    };
+    option (google.api.method_signature) = "name";
+  }
+
+  // ListApprovalRecords lists all approval records for a specific issue or task.
+  rpc ListApprovalRecords(ListApprovalRecordsRequest) returns (ListApprovalRecordsResponse) {
+    option (google.api.http) = {
+      get: "/v1/{parent=projects/*/issues/*}/approvalRecords"
+    };
+    option (google.api.method_signature) = "parent";
+  }
+
+  // ApproveIssue approves an issue.
+  rpc ApproveIssue(ApproveIssueRequest) returns (ApprovalRecord) {
+    option (google.api.http) = {
+      post: "/v1/{name=projects/*/issues/*}:approve"
+      body: "*"
+    };
+  }
+
+  // RejectIssue rejects an issue.
+  rpc RejectIssue(RejectIssueRequest) returns (ApprovalRecord) {
+    option (google.api.http) = {
+      post: "/v1/{name=projects/*/issues/*}:reject"
+      body: "*"
+    };
+  }
+
+  // EvaluateSensitiveDataChange evaluates a database change for sensitive data implications.
+  rpc EvaluateSensitiveDataChange(EvaluateSensitiveDataChangeRequest) returns (EvaluateSensitiveDataChangeResponse) {
+    option (google.api.http) = {
+      post: "/v1/{parent=projects/*}/sensitiveData:evaluateChange"
+      body: "*"
+    };
+  }
+}
+
+// EvaluateSensitiveDataChangeRequest is the request message for EvaluateSensitiveDataChange method.
+message EvaluateSensitiveDataChangeRequest {
+  // The parent resource name. Format: projects/{project}
+  string parent = 1 [(google.api.field_behavior) = REQUIRED, (google.api.resource_reference) = {type: "bytebase.com/Project"}];
+
+  // The database change to evaluate. This can be a SQL statement or a schema change.
+  string change = 2 [(google.api.field_behavior) = REQUIRED];
+
+  // The database to which the change applies. Format: projects/{project}/databases/{database}
+  string database = 3 [(google.api.field_behavior) = REQUIRED, (google.api.resource_reference) = {type: "bytebase.com/Database"}];
+}
+
+// EvaluateSensitiveDataChangeResponse is the response message for EvaluateSensitiveDataChange method.
+message EvaluateSensitiveDataChangeResponse {
+  // Whether the change affects sensitive data.
+  bool affects_sensitive_data = 1;
+
+  // The highest sensitivity level of the data affected by the change.
+  SensitiveDataLevel highest_sensitive_level = 2;
+
+  // The list of sensitive data rules that match the change.
+  repeated SensitiveDataRule matching_rules = 3;
+
+  // The approval flow that applies to this change, if any.
+  optional ApprovalFlow required_approval_flow = 4;
+
+  // A list of warnings about the sensitive data implications of the change.
+  repeated string warnings = 5;
+}
+
+// SensitiveDataLevel defines the sensitivity level of data.
+enum SensitiveDataLevel {
+  // Unspecified sensitivity level.
+  SENSITIVE_DATA_LEVEL_UNSPECIFIED = 0;
+  // Low sensitivity data.
+  SENSITIVE_DATA_LEVEL_LOW = 1;
+  // Medium sensitivity data.
+  SENSITIVE_DATA_LEVEL_MEDIUM = 2;
+  // High sensitivity data.
+  SENSITIVE_DATA_LEVEL_HIGH = 3;
+}
+
+// SensitiveDataRule defines a rule for classifying sensitive data.
+message SensitiveDataRule {
+  option (google.api.resource) = {
+    type: "bytebase.com/SensitiveDataRule"
+    pattern: "projects/{project}/sensitiveDataRules/{sensitive_data_rule}"
+  };
+
+  // The name of the sensitive data rule. Format: projects/{project}/sensitiveDataRules/{sensitive_data_rule}
+  string name = 1 [(google.api.field_behavior) = OUTPUT_ONLY];
+
+  // The title of the sensitive data rule.
+  string title = 2 [(google.api.field_behavior) = REQUIRED];
+
+  // The description of the sensitive data rule.
+  optional string description = 3;
+
+  // The sensitivity level of the data matching this rule.
+  SensitiveDataLevel level = 4 [(google.api.field_behavior) = REQUIRED];
+
+  // The database table to which this rule applies. Format: projects/{project}/databases/{database}/tables/{table}
+  optional string table = 5;
+
+  // The field name pattern to match. Can be a full name or a wildcard pattern.
+  optional string field_pattern = 6;
+
+  // The data type to match. For example: "VARCHAR", "INT", "EMAIL", etc.
+  optional string data_type = 7;
+
+  // The regular expression pattern to match against field values.
+  optional string regex_pattern = 8;
+
+  // The time when the rule was created.
+  google.protobuf.Timestamp create_time = 9 [(google.api.field_behavior) = OUTPUT_ONLY];
+
+  // The time when the rule was last updated.
+  google.protobuf.Timestamp update_time = 10 [(google.api.field_behavior) = OUTPUT_ONLY];
+}
+
+// ApprovalFlow defines an approval workflow for sensitive data changes.
+message ApprovalFlow {
+  option (google.api.resource) = {
+    type: "bytebase.com/ApprovalFlow"
+    pattern: "projects/{project}/approvalFlows/{approval_flow}"
+  };
+
+  // The name of the approval flow. Format: projects/{project}/approvalFlows/{approval_flow}
+  string name = 1 [(google.api.field_behavior) = OUTPUT_ONLY];
+
+  // The title of the approval flow.
+  string title = 2 [(google.api.field_behavior) = REQUIRED];
+
+  // The description of the approval flow.
+  optional string description = 3;
+
+  // The sensitivity level to which this approval flow applies.
+  SensitiveDataLevel sensitive_level = 4 [(google.api.field_behavior) = REQUIRED];
+
+  // The approval steps in order. Each step defines a role or user that must approve.
+  repeated ApprovalStep steps = 5 [(google.api.field_behavior) = REQUIRED];
+
+  // The time when the approval flow was created.
+  google.protobuf.Timestamp create_time = 6 [(google.api.field_behavior) = OUTPUT_ONLY];
+
+  // The time when the approval flow was last updated.
+  google.protobuf.Timestamp update_time = 7 [(google.api.field_behavior) = OUTPUT_ONLY];
+}
+
+// ApprovalStep defines a single step in an approval workflow.
+message ApprovalStep {
+  // The title of the approval step.
+  string title = 1 [(google.api.field_behavior) = REQUIRED];
+
+  // The description of the approval step.
+  optional string description = 2;
+
+  // The role required for this approval step. Can be one of: "DBA", "DEPARTMENT_HEAD", "PROJECT_OWNER", etc.
+  optional string role = 3;
+
+  // The specific user required for this approval step. Format: users/{user}
+  optional string user = 4;
+
+  // Whether multiple approvals are required from users with the specified role.
+  optional bool require_multiple_approvals = 5;
+
+  // The number of approvals required if require_multiple_approvals is true.
+  optional int32 approval_count = 6;
+}
+
+// ApprovalRecord defines a record of an approval action.
+message ApprovalRecord {
+  option (google.api.resource) = {
+    type: "bytebase.com/ApprovalRecord"
+    pattern: "projects/{project}/issues/{issue}/approvalRecords/{approval_record}"
+  };
+
+  // The name of the approval record. Format: projects/{project}/issues/{issue}/approvalRecords/{approval_record}
+  string name = 1 [(google.api.field_behavior) = OUTPUT_ONLY];
+
+  // The issue to which this approval record belongs. Format: projects/{project}/issues/{issue}
+  string issue = 2 [(google.api.field_behavior) = OUTPUT_ONLY];
+
+  // The approval step index this record corresponds to.
+  int32 step_index = 3 [(google.api.field_behavior) = OUTPUT_ONLY];
+
+  // The user who performed the approval action. Format: users/{user}
+  string approver = 4 [(google.api.field_behavior) = OUTPUT_ONLY];
+
+  // The action performed: APPROVED or REJECTED.
+  ApprovalAction action = 5 [(google.api.field_behavior) = OUTPUT_ONLY];
+
+  // The comment provided by the approver.
+  optional string comment = 6;
+
+  // The time when the approval action was performed.
+  google.protobuf.Timestamp create_time = 7 [(google.api.field_behavior) = OUTPUT_ONLY];
+}
+
+// ApprovalAction defines the action taken in an approval record.
+enum ApprovalAction {
+  // Unspecified approval action.
+  APPROVAL_ACTION_UNSPECIFIED = 0;
+  // The approval was approved.
+  APPROVAL_ACTION_APPROVED = 1;
+  // The approval was rejected.
+  APPROVAL_ACTION_REJECTED = 2;
+}
+
+// ListSensitiveDataRulesRequest is the request message for ListSensitiveDataRules method.
+message ListSensitiveDataRulesRequest {
+  // The parent resource name. Format: projects/{project}
+  string parent = 1 [(google.api.field_behavior) = REQUIRED, (google.api.resource_reference) = {type: "bytebase.com/Project"}];
+
+  // The maximum number of rules to return. The service may return fewer than this value.
+  // If unspecified, at most 50 rules will be returned.
+  // The maximum value is 1000; values above 1000 will be coerced to 1000.
+  int32 page_size = 2;
+
+  // A page token, received from a previous `ListSensitiveDataRules` call.
+  // Provide this to retrieve the subsequent page.
+  // When paginating, all other parameters provided to `ListSensitiveDataRules` must match
+  // the call that provided the page token.
+  string page_token = 3;
+
+  // A filter to apply to results.
+  optional string filter = 4;
+}
+
+// ListSensitiveDataRulesResponse is the response message for ListSensitiveDataRules method.
+message ListSensitiveDataRulesResponse {
+  // The list of sensitive data rules.
+  repeated SensitiveDataRule rules = 1;
+
+  // A token, which can be sent as `page_token` to retrieve the next page.
+  // If this field is omitted, there are no subsequent pages.
+  string next_page_token = 2;
+}
+
+// GetSensitiveDataRuleRequest is the request message for GetSensitiveDataRule method.
+message GetSensitiveDataRuleRequest {
+  // The name of the sensitive data rule. Format: projects/{project}/sensitiveDataRules/{sensitive_data_rule}
+  string name = 1 [(google.api.field_behavior) = REQUIRED, (google.api.resource_reference) = {type: "bytebase.com/SensitiveDataRule"}];
+}
+
+// CreateSensitiveDataRuleRequest is the request message for CreateSensitiveDataRule method.
+message CreateSensitiveDataRuleRequest {
+  // The parent resource name. Format: projects/{project}
+  string parent = 1 [(google.api.field_behavior) = REQUIRED, (google.api.resource_reference) = {type: "bytebase.com/Project"}];
+
+  // The sensitive data rule to create.
+  SensitiveDataRule rule = 2 [(google.api.field_behavior) = REQUIRED];
+
+  // The ID to use for the sensitive data rule, which will become the final component of the rule's resource name.
+  // If omitted, the server will assign a random ID.
+  optional string rule_id = 3 [(google.api.field_behavior) = OPTIONAL];
+}
+
+// UpdateSensitiveDataRuleRequest is the request message for UpdateSensitiveDataRule method.
+message UpdateSensitiveDataRuleRequest {
+  // The sensitive data rule to update.
+  // The rule's `name` field is used to identify the rule to update.
+  SensitiveDataRule rule = 1 [(google.api.field_behavior) = REQUIRED];
+
+  // The list of fields to update.
+  google.protobuf.FieldMask update_mask = 2 [(google.api.field_behavior) = REQUIRED];
+}
+
+// DeleteSensitiveDataRuleRequest is the request message for DeleteSensitiveDataRule method.
+message DeleteSensitiveDataRuleRequest {
+  // The name of the sensitive data rule to delete. Format: projects/{project}/sensitiveDataRules/{sensitive_data_rule}
+  string name = 1 [(google.api.field_behavior) = REQUIRED, (google.api.resource_reference) = {type: "bytebase.com/SensitiveDataRule"}];
+}
+
+// ListApprovalFlowsRequest is the request message for ListApprovalFlows method.
+message ListApprovalFlowsRequest {
+  // The parent resource name. Format: projects/{project}
+  string parent = 1 [(google.api.field_behavior) = REQUIRED, (google.api.resource_reference) = {type: "bytebase.com/Project"}];
+
+  // The maximum number of flows to return. The service may return fewer than this value.
+  // If unspecified, at most 50 flows will be returned.
+  // The maximum value is 1000; values above 1000 will be coerced to 1000.
+  int32 page_size = 2;
+
+  // A page token, received from a previous `ListApprovalFlows` call.
+  // Provide this to retrieve the subsequent page.
+  // When paginating, all other parameters provided to `ListApprovalFlows` must match
+  // the call that provided the page token.
+  string page_token = 3;
+
+  // A filter to apply to results.
+  optional string filter = 4;
+}
+
+// ListApprovalFlowsResponse is the response message for ListApprovalFlows method.
+message ListApprovalFlowsResponse {
+  // The list of approval flows.
+  repeated ApprovalFlow flows = 1;
+
+  // A token, which can be sent as `page_token` to retrieve the next page.
+  // If this field is omitted, there are no subsequent pages.
+  string next_page_token = 2;
+}
+
+// GetApprovalFlowRequest is the request message for GetApprovalFlow method.
+message GetApprovalFlowRequest {
+  // The name of the approval flow. Format: projects/{project}/approvalFlows/{approval_flow}
+  string name = 1 [(google.api.field_behavior) = REQUIRED, (google.api.resource_reference) = {type: "bytebase.com/ApprovalFlow"}];
+}
+
+// CreateApprovalFlowRequest is the request message for CreateApprovalFlow method.
+message CreateApprovalFlowRequest {
+  // The parent resource name. Format: projects/{project}
+  string parent = 1 [(google.api.field_behavior) = REQUIRED, (google.api.resource_reference) = {type: "bytebase.com/Project"}];
+
+  // The approval flow to create.
+  ApprovalFlow flow = 2 [(google.api.field_behavior) = REQUIRED];
+
+  // The ID to use for the approval flow, which will become the final component of the flow's resource name.
+  // If omitted, the server will assign a random ID.
+  optional string flow_id = 3 [(google.api.field_behavior) = OPTIONAL];
+}
+
+// UpdateApprovalFlowRequest is the request message for UpdateApprovalFlow method.
+message UpdateApprovalFlowRequest {
+  // The approval flow to update.
+  // The flow's `name` field is used to identify the flow to update.
+  ApprovalFlow flow = 1 [(google.api.field_behavior) = REQUIRED];
+
+  // The list of fields to update.
+  google.protobuf.FieldMask update_mask = 2 [(google.api.field_behavior) = REQUIRED];
+}
+
+// DeleteApprovalFlowRequest is the request message for DeleteApprovalFlow method.
+message DeleteApprovalFlowRequest {
+  // The name of the approval flow to delete. Format: projects/{project}/approvalFlows/{approval_flow}
+  string name = 1 [(google.api.field_behavior) = REQUIRED, (google.api.resource_reference) = {type: "bytebase.com/ApprovalFlow"}];
+}
+
+// ListApprovalRecordsRequest is the request message for ListApprovalRecords method.
+message ListApprovalRecordsRequest {
+  // The parent resource name. Format: projects/{project}/issues/{issue}
+  string parent = 1 [(google.api.field_behavior) = REQUIRED, (google.api.resource_reference) = {type: "bytebase.com/Issue"}];
+
+  // The maximum number of records to return. The service may return fewer than this value.
+  // If unspecified, at most 50 records will be returned.
+  // The maximum value is 1000; values above 1000 will be coerced to 1000.
+  int32 page_size = 2;
+
+  // A page token, received from a previous `ListApprovalRecords` call.
+  // Provide this to retrieve the subsequent page.
+  // When paginating, all other parameters provided to `ListApprovalRecords` must match
+  // the call that provided the page token.
+  string page_token = 3;
+}
+
+// ListApprovalRecordsResponse is the response message for ListApprovalRecords method.
+message ListApprovalRecordsResponse {
+  // The list of approval records.
+  repeated ApprovalRecord records = 1;
+
+  // A token, which can be sent as `page_token` to retrieve the next page.
+  // If this field is omitted, there are no subsequent pages.
+  string next_page_token = 2;
+}
+
+// ApproveIssueRequest is the request message for ApproveIssue method.
+message ApproveIssueRequest {
+  // The name of the issue to approve. Format: projects/{project}/issues/{issue}
+  string name = 1 [(google.api.field_behavior) = REQUIRED, (google.api.resource_reference) = {type: "bytebase.com/Issue"}];
+
+  // The comment provided by the approver.
+  optional string comment = 2;
+}
+
+// RejectIssueRequest is the request message for RejectIssue method.
+message RejectIssueRequest {
+  // The name of the issue to reject. Format: projects/{project}/issues/{issue}
+  string name = 1 [(google.api.field_behavior) = REQUIRED, (google.api.resource_reference) = {type: "bytebase.com/Issue"}];
+
+  // The comment provided by the approver explaining the rejection.
+  string comment = 2 [(google.api.field_behavior) = REQUIRED];
+}
