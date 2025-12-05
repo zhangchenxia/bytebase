@@ -98,6 +98,8 @@ func configureGrpcRouters(
 	userService := apiv1.NewUserService(stores, secret, licenseService, metricReporter, profile, stateCfg, iamManager)
 	worksheetService := apiv1.NewWorksheetService(stores, iamManager)
 	workspaceService := apiv1.NewWorkspaceService(stores, iamManager)
+	sensitiveDataService := apiv1.NewSensitiveDataService(stores)
+	approvalFlowService := apiv1.NewApprovalFlowService(stores)
 
 	onPanic := func(_ context.Context, s connect.Spec, _ http.Header, p any) error {
 		stack := stacktrace.TakeStacktrace(20 /* n */, 5 /* skip */)
@@ -199,6 +201,12 @@ func configureGrpcRouters(
 
 	worksheetPath, worksheetHandler := v1connect.NewWorksheetServiceHandler(worksheetService, handlerOpts)
 	connectHandlers[worksheetPath] = worksheetHandler
+
+	sensitiveDataPath, sensitiveDataHandler := v1connect.NewSensitiveDataServiceHandler(sensitiveDataService, handlerOpts)
+	connectHandlers[sensitiveDataPath] = sensitiveDataHandler
+
+	approvalFlowPath, approvalFlowHandler := v1connect.NewApprovalFlowServiceHandler(approvalFlowService, handlerOpts)
+	connectHandlers[approvalFlowPath] = approvalFlowHandler
 
 	workspacePath, workspaceHandler := v1connect.NewWorkspaceServiceHandler(workspaceService, handlerOpts)
 	connectHandlers[workspacePath] = workspaceHandler

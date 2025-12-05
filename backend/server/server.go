@@ -204,6 +204,9 @@ func NewServer(ctx context.Context, profile *config.Profile) (*Server, error) {
 	s.planCheckScheduler.Register(store.PlanCheckDatabaseGhostSync, ghostSyncExecutor)
 	statementReportExecutor := plancheck.NewStatementReportExecutor(stores, sheetManager, s.dbFactory)
 	s.planCheckScheduler.Register(store.PlanCheckDatabaseStatementSummaryReport, statementReportExecutor)
+	// Register sensitive data checker executor
+	sensitiveDataChecker := plancheck.NewSensitiveDataChecker(stores, sheetManager, s.dbFactory)
+	s.planCheckScheduler.Register(store.PlanCheckDatabaseSensitiveData, sensitiveDataChecker)
 
 	// Export archive cleaner
 	s.exportArchiveCleaner = runnermigrator.NewExportArchiveCleaner(stores)

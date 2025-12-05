@@ -1,0 +1,345 @@
+package bytebase.v1;
+
+option go_package = "generated-go/v1";
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "v1/common.proto";
+
+// ApprovalFlowService handles operations related to approval workflows.
+service ApprovalFlowService {
+  // ListApprovalFlows returns a list of approval flows.
+  rpc ListApprovalFlows(ListApprovalFlowsRequest) returns (ListApprovalFlowsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/approval-flow"
+    };
+  }
+
+  // GetApprovalFlow returns a specific approval flow.
+  rpc GetApprovalFlow(GetApprovalFlowRequest) returns (GetApprovalFlowResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/approval-flow/{name=approvalFlows/*}"
+    };
+  }
+
+  // CreateApprovalFlow creates a new approval flow.
+  rpc CreateApprovalFlow(CreateApprovalFlowRequest) returns (CreateApprovalFlowResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/approval-flow"
+      body: "flow"
+    };
+  }
+
+  // UpdateApprovalFlow updates an existing approval flow.
+  rpc UpdateApprovalFlow(UpdateApprovalFlowRequest) returns (UpdateApprovalFlowResponse) {
+    option (google.api.http) = {
+      patch: "/api/v1/approval-flow/{name=approvalFlows/*}"
+      body: "flow"
+    };
+  }
+
+  // DeleteApprovalFlow deletes an existing approval flow.
+  rpc DeleteApprovalFlow(DeleteApprovalFlowRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/api/v1/approval-flow/{name=approvalFlows/*}"
+    };
+  }
+
+  // ListApprovalFlowExecutions returns a list of approval flow executions.
+  rpc ListApprovalFlowExecutions(ListApprovalFlowExecutionsRequest) returns (ListApprovalFlowExecutionsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/approval-flow/executions"
+    };
+  }
+
+  // GetApprovalFlowExecution returns a specific approval flow execution.
+  rpc GetApprovalFlowExecution(GetApprovalFlowExecutionRequest) returns (GetApprovalFlowExecutionResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/approval-flow/executions/{name=approvalFlowExecutions/*}"
+    };
+  }
+
+  // ApproveApprovalFlowExecution approves an approval flow execution.
+  rpc ApproveApprovalFlowExecution(ApproveApprovalFlowExecutionRequest) returns (ApproveApprovalFlowExecutionResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/approval-flow/executions/{name=approvalFlowExecutions/*}:approve"
+      body: "*"
+    };
+  }
+
+  // RejectApprovalFlowExecution rejects an approval flow execution.
+  rpc RejectApprovalFlowExecution(RejectApprovalFlowExecutionRequest) returns (RejectApprovalFlowExecutionResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/approval-flow/executions/{name=approvalFlowExecutions/*}:reject"
+      body: "*"
+    };
+  }
+}
+
+// ListApprovalFlowsRequest is the request message for ListApprovalFlows.
+message ListApprovalFlowsRequest {
+  // The parent resource name, e.g., "workspaces/{workspace}".
+  string parent = 1;
+  // The filter to apply to the list.
+  string filter = 2;
+  // The maximum number of items to return.
+  int32 page_size = 3;
+  // The next_page_token value returned from a previous List request, if any.
+  string page_token = 4;
+}
+
+// ListApprovalFlowsResponse is the response message for ListApprovalFlows.
+message ListApprovalFlowsResponse {
+  // The list of approval flows.
+  repeated ApprovalFlow flows = 1;
+  // The token to retrieve the next page of results, or empty if there are no more results.
+  string next_page_token = 2;
+}
+
+// GetApprovalFlowRequest is the request message for GetApprovalFlow.
+message GetApprovalFlowRequest {
+  // The name of the approval flow to retrieve, e.g., "approvalFlows/{flow}".
+  string name = 1;
+}
+
+// GetApprovalFlowResponse is the response message for GetApprovalFlow.
+message GetApprovalFlowResponse {
+  // The approval flow.
+  ApprovalFlow flow = 1;
+}
+
+// CreateApprovalFlowRequest is the request message for CreateApprovalFlow.
+message CreateApprovalFlowRequest {
+  // The parent resource name, e.g., "workspaces/{workspace}".
+  string parent = 1;
+  // The approval flow to create.
+  ApprovalFlow flow = 2;
+}
+
+// CreateApprovalFlowResponse is the response message for CreateApprovalFlow.
+message CreateApprovalFlowResponse {
+  // The created approval flow.
+  ApprovalFlow flow = 1;
+}
+
+// UpdateApprovalFlowRequest is the request message for UpdateApprovalFlow.
+message UpdateApprovalFlowRequest {
+  // The approval flow to update.
+  ApprovalFlow flow = 1;
+  // The list of fields to update.
+  repeated string update_mask = 2;
+}
+
+// UpdateApprovalFlowResponse is the response message for UpdateApprovalFlow.
+message UpdateApprovalFlowResponse {
+  // The updated approval flow.
+  ApprovalFlow flow = 1;
+}
+
+// DeleteApprovalFlowRequest is the request message for DeleteApprovalFlow.
+message DeleteApprovalFlowRequest {
+  // The name of the approval flow to delete, e.g., "approvalFlows/{flow}".
+  string name = 1;
+}
+
+// ListApprovalFlowExecutionsRequest is the request message for ListApprovalFlowExecutions.
+message ListApprovalFlowExecutionsRequest {
+  // The parent resource name, e.g., "workspaces/{workspace}".
+  string parent = 1;
+  // The filter to apply to the list.
+  string filter = 2;
+  // The maximum number of items to return.
+  int32 page_size = 3;
+  // The next_page_token value returned from a previous List request, if any.
+  string page_token = 4;
+}
+
+// ListApprovalFlowExecutionsResponse is the response message for ListApprovalFlowExecutions.
+message ListApprovalFlowExecutionsResponse {
+  // The list of approval flow executions.
+  repeated ApprovalFlowExecution executions = 1;
+  // The token to retrieve the next page of results, or empty if there are no more results.
+  string next_page_token = 2;
+}
+
+// GetApprovalFlowExecutionRequest is the request message for GetApprovalFlowExecution.
+message GetApprovalFlowExecutionRequest {
+  // The name of the approval flow execution to retrieve, e.g., "approvalFlowExecutions/{execution}".
+  string name = 1;
+}
+
+// GetApprovalFlowExecutionResponse is the response message for GetApprovalFlowExecution.
+message GetApprovalFlowExecutionResponse {
+  // The approval flow execution.
+  ApprovalFlowExecution execution = 1;
+}
+
+// ApproveApprovalFlowExecutionRequest is the request message for ApproveApprovalFlowExecution.
+message ApproveApprovalFlowExecutionRequest {
+  // The name of the approval flow execution to approve, e.g., "approvalFlowExecutions/{execution}".
+  string name = 1;
+  // The comment to add to the approval.
+  string comment = 2;
+}
+
+// ApproveApprovalFlowExecutionResponse is the response message for ApproveApprovalFlowExecution.
+message ApproveApprovalFlowExecutionResponse {
+  // The updated approval flow execution.
+  ApprovalFlowExecution execution = 1;
+}
+
+// RejectApprovalFlowExecutionRequest is the request message for RejectApprovalFlowExecution.
+message RejectApprovalFlowExecutionRequest {
+  // The name of the approval flow execution to reject, e.g., "approvalFlowExecutions/{execution}".
+  string name = 1;
+  // The comment to add to the rejection.
+  string comment = 2;
+}
+
+// RejectApprovalFlowExecutionResponse is the response message for RejectApprovalFlowExecution.
+message RejectApprovalFlowExecutionResponse {
+  // The updated approval flow execution.
+  ApprovalFlowExecution execution = 1;
+}
+
+// ApprovalFlow represents an approval workflow configuration.
+message ApprovalFlow {
+  // The name of the approval flow, e.g., "approvalFlows/{flow}".
+  string name = 1;
+  // The title of the approval flow.
+  string title = 2;
+  // The description of the approval flow.
+  string description = 3;
+  // The sensitivity level this approval flow applies to.
+  SensitiveDataLevel sensitivity_level = 4;
+  // The list of approval nodes in the flow.
+  repeated ApprovalNode nodes = 5;
+  // Whether this approval flow is enabled.
+  bool enabled = 6;
+  // Output only. The time this approval flow was created.
+  Time create_time = 7;
+  // Output only. The time this approval flow was last updated.
+  Time update_time = 8;
+}
+
+// ApprovalNode represents a single node in an approval flow.
+message ApprovalNode {
+  // The name of the approval node, e.g., "approvalNodes/{node}".
+  string name = 1;
+  // The title of the approval node.
+  string title = 2;
+  // The description of the approval node.
+  string description = 3;
+  // The type of approver for this node.
+  ApproverType approver_type = 4;
+  // The list of approver IDs for this node (only applicable for specific types).
+  repeated string approver_ids = 5;
+  // The number of approvals required for this node.
+  int32 required_approvals = 6;
+}
+
+// ApproverType represents the type of approver for an approval node.
+enum ApproverType {
+  APPROVER_TYPE_UNSPECIFIED = 0;
+  // The department head of the applicant.
+  DEPARTMENT_HEAD = 1;
+  // A DBA (Database Administrator).
+  DBA = 2;
+  // A specific user.
+  SPECIFIC_USER = 3;
+  // A specific role.
+  SPECIFIC_ROLE = 4;
+  // Anyone in a specific group.
+  GROUP_MEMBER = 5;
+}
+
+// ApprovalFlowExecution represents an execution of an approval flow.
+message ApprovalFlowExecution {
+  // The name of the approval flow execution, e.g., "approvalFlowExecutions/{execution}".
+  string name = 1;
+  // The name of the approval flow that this execution is based on.
+  string flow_name = 2;
+  // The name of the issue that this approval flow execution is associated with.
+  string issue_name = 3;
+  // The sensitivity level of the data change being approved.
+  SensitiveDataLevel sensitivity_level = 4;
+  // The current status of the approval flow execution.
+  ApprovalFlowExecutionStatus status = 5;
+  // The list of approval node executions in this flow.
+  repeated ApprovalNodeExecution node_executions = 6;
+  // Output only. The time this approval flow execution was created.
+  Time create_time = 7;
+  // Output only. The time this approval flow execution was last updated.
+  Time update_time = 8;
+}
+
+// ApprovalFlowExecutionStatus represents the status of an approval flow execution.
+enum ApprovalFlowExecutionStatus {
+  APPROVAL_FLOW_EXECUTION_STATUS_UNSPECIFIED = 0;
+  // The approval flow execution is pending.
+  PENDING = 1;
+  // The approval flow execution is in progress.
+  IN_PROGRESS = 2;
+  // The approval flow execution has been approved.
+  APPROVED = 3;
+  // The approval flow execution has been rejected.
+  REJECTED = 4;
+  // The approval flow execution has been cancelled.
+  CANCELLED = 5;
+}
+
+// ApprovalNodeExecution represents an execution of an approval node.
+message ApprovalNodeExecution {
+  // The name of the approval node execution, e.g., "approvalNodeExecutions/{execution}".
+  string name = 1;
+  // The name of the approval node that this execution is based on.
+  string node_name = 2;
+  // The current status of the approval node execution.
+  ApprovalNodeExecutionStatus status = 3;
+  // The list of approvals for this node.
+  repeated Approval approvals = 4;
+  // Output only. The time this approval node execution was created.
+  Time create_time = 5;
+  // Output only. The time this approval node execution was last updated.
+  Time update_time = 6;
+}
+
+// ApprovalNodeExecutionStatus represents the status of an approval node execution.
+enum ApprovalNodeExecutionStatus {
+  APPROVAL_NODE_EXECUTION_STATUS_UNSPECIFIED = 0;
+  // The approval node execution is pending.
+  PENDING = 1;
+  // The approval node execution is in progress.
+  IN_PROGRESS = 2;
+  // The approval node execution has been approved.
+  APPROVED = 3;
+  // The approval node execution has been rejected.
+  REJECTED = 4;
+  // The approval node execution has been skipped.
+  SKIPPED = 5;
+}
+
+// Approval represents an approval or rejection of an approval node.
+message Approval {
+  // The name of the approval, e.g., "approvals/{approval}".
+  string name = 1;
+  // The name of the user who performed the approval.
+  string user_name = 2;
+  // The status of the approval.
+  ApprovalStatus status = 3;
+  // The comment added to the approval.
+  string comment = 4;
+  // Output only. The time this approval was created.
+  Time create_time = 5;
+}
+
+// ApprovalStatus represents the status of an approval.
+enum ApprovalStatus {
+  APPROVAL_STATUS_UNSPECIFIED = 0;
+  // The approval is pending.
+  PENDING = 1;
+  // The approval has been approved.
+  APPROVED = 2;
+  // The approval has been rejected.
+  REJECTED = 3;
+}

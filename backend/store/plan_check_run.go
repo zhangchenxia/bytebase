@@ -28,6 +28,7 @@ const (
 	PlanCheckDatabaseConnect PlanCheckRunType = "bb.plan-check.database.connect"
 	// PlanCheckDatabaseGhostSync is the plan check type for the gh-ost sync task.
 	PlanCheckDatabaseGhostSync PlanCheckRunType = "bb.plan-check.database.ghost.sync"
+	PlanCheckDatabaseSensitiveData PlanCheckRunType = "bb.plan-check.database.sensitive-data"
 )
 
 // PlanCheckRunStatus is the status of a plan check run.

@@ -98,6 +98,14 @@
             @update="handleUpdate"
           />
         </div>
+
+        <!-- Approval Flow Visualization -->
+        <div class="flex flex-col gap-y-2">
+          <h3 class="font-medium text-sm text-control">
+            {{ $t("custom-approval.approval-flow.visualization") }}
+          </h3>
+          <ApprovalFlowVisualizer :flow="state.flow" />
+        </div>
       </div>
 
       <footer
@@ -146,6 +154,7 @@ import {
   getApprovalOptionConfigMap,
 } from "../../common/utils";
 import { StepsTable } from "../common";
+import ApprovalFlowVisualizer from "./common/ApprovalFlowVisualizer.vue";
 import { useCustomApprovalContext } from "../context";
 import {
   type ApprovalRuleTemplate,

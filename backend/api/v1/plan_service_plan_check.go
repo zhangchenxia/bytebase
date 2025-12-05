@@ -230,6 +230,19 @@ func getPlanCheckRunsFromChangeDatabaseConfigForDatabase(ctx context.Context, s 
 			EnableSdl:    enableSDL,
 		},
 	})
+	// Add sensitive data check
+	planCheckRuns = append(planCheckRuns, &store.PlanCheckRunMessage{
+		PlanUID: plan.UID,
+		Status:  store.PlanCheckRunStatusRunning,
+		Type:    store.PlanCheckDatabaseSensitiveData,
+		Config: &storepb.PlanCheckRunConfig{
+			SheetUid:     int32(sheetUID),
+			InstanceId:   instance.ResourceID,
+			DatabaseName: database.DatabaseName,
+			EnableGhost:  config.EnableGhost,
+			EnableSdl:    enableSDL,
+		},
+	})
 	if config.Type == storepb.PlanConfig_ChangeDatabaseConfig_MIGRATE && config.EnableGhost {
 		planCheckRuns = append(planCheckRuns, &store.PlanCheckRunMessage{
 			PlanUID: plan.UID,
