@@ -169,3 +169,15 @@ func getDatabaseCacheKey(instanceID, databaseName string) string {
 func getDatabaseGroupCacheKey(projectID, resourceID string) string {
 	return fmt.Sprintf("%s/%s", projectID, resourceID)
 }
+
+// CreateNotification creates a new notification.
+func (s *Store) CreateNotification(ctx context.Context, create *Notification) (*Notification, error)
+
+// ListNotifications lists notifications for a given recipient.
+func (s *Store) ListNotifications(ctx context.Context, recipientID int32, read *bool) ([]*Notification, error)
+
+// UpdateNotification updates a notification.
+func (s *Store) UpdateNotification(ctx context.Context, update *Notification) (*Notification, error)
+
+// DeleteNotification deletes a notification.
+func (s *Store) DeleteNotification(ctx context.Context, id int32) error

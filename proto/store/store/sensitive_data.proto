@@ -1,0 +1,82 @@
+package bytebase.store;
+
+option go_package = "generated-go/store";
+
+// SensitiveDataLevel represents the sensitivity level of data.
+enum SensitiveDataLevel {
+  SENSITIVE_DATA_LEVEL_UNSPECIFIED = 0;
+  // Low sensitivity data, no approval required.
+  LOW = 1;
+  // Medium sensitivity data, 1 level approval required.
+  MEDIUM = 2;
+  // High sensitivity data, 2 level approval required.
+  HIGH = 3;
+}
+
+// SensitiveDataRule represents a rule for identifying sensitive data.
+message SensitiveDataRule {
+  // The unique ID of the sensitive data rule.
+  int32 id = 1;
+  // The title of the sensitive data rule.
+  string title = 2;
+  // The description of the sensitive data rule.
+  string description = 3;
+  // The sensitivity level of the data identified by this rule.
+  SensitiveDataLevel level = 4;
+  // The database type this rule applies to (e.g., MYSQL, POSTGRES).
+  string database_type = 5;
+  // The table name pattern this rule applies to (supports wildcards).
+  string table_pattern = 6;
+  // The column name pattern this rule applies to (supports wildcards).
+  string column_pattern = 7;
+  // The data type this rule applies to (e.g., VARCHAR, INT).
+  string data_type = 8;
+  // The regular expression used to match sensitive data.
+  string regex_pattern = 9;
+  // Whether this rule is enabled.
+  bool enabled = 10;
+  // The ID of the user who created this rule.
+  int32 creator_id = 11;
+  // The ID of the user who last updated this rule.
+  int32 updater_id = 12;
+  // The time this rule was created.
+  int64 create_time = 13;
+  // The time this rule was last updated.
+  int64 update_time = 14;
+}
+
+// SensitiveDataField represents a field that contains sensitive data.
+message SensitiveDataField {
+  // The ID of the database table this field belongs to.
+  int32 table_id = 1;
+  // The name of the database table this field belongs to.
+  string table_name = 2;
+  // The name of the field that contains sensitive data.
+  string field_name = 3;
+  // The sensitivity level of the data in this field.
+  SensitiveDataLevel level = 4;
+  // The ID of the rule that identified this sensitive field.
+  int32 rule_id = 5;
+}
+
+// SensitiveDataChange represents a change to sensitive data.
+message SensitiveDataChange {
+  // The ID of the change to sensitive data.
+  int32 id = 1;
+  // The ID of the issue that contains this change.
+  int32 issue_id = 2;
+  // The ID of the database table that contains the sensitive data.
+  int32 table_id = 3;
+  // The name of the database table that contains the sensitive data.
+  string table_name = 4;
+  // The name of the field that contains sensitive data.
+  string field_name = 5;
+  // The sensitivity level of the data in this field.
+  SensitiveDataLevel level = 6;
+  // The type of change (e.g., INSERT, UPDATE, DELETE).
+  string change_type = 7;
+  // The old value of the sensitive data (if applicable).
+  string old_value = 8;
+  // The new value of the sensitive data (if applicable).
+  string new_value = 9;
+}

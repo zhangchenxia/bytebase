@@ -1,0 +1,195 @@
+package bytebase.v1;
+
+option go_package = "generated-go/v1";
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "v1/common.proto";
+
+// SensitiveDataService handles operations related to sensitive data classification.
+service SensitiveDataService {
+  // ListSensitiveDataRules returns a list of sensitive data rules.
+  rpc ListSensitiveDataRules(ListSensitiveDataRulesRequest) returns (ListSensitiveDataRulesResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/sensitive-level/rules"
+    };
+  }
+
+  // GetSensitiveDataRule returns a specific sensitive data rule.
+  rpc GetSensitiveDataRule(GetSensitiveDataRuleRequest) returns (GetSensitiveDataRuleResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/sensitive-level/rules/{name=sensitiveDataRules/*}"
+    };
+  }
+
+  // CreateSensitiveDataRule creates a new sensitive data rule.
+  rpc CreateSensitiveDataRule(CreateSensitiveDataRuleRequest) returns (CreateSensitiveDataRuleResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/sensitive-level/rules"
+      body: "rule"
+    };
+  }
+
+  // UpdateSensitiveDataRule updates an existing sensitive data rule.
+  rpc UpdateSensitiveDataRule(UpdateSensitiveDataRuleRequest) returns (UpdateSensitiveDataRuleResponse) {
+    option (google.api.http) = {
+      patch: "/api/v1/sensitive-level/rules/{name=sensitiveDataRules/*}"
+      body: "rule"
+    };
+  }
+
+  // DeleteSensitiveDataRule deletes an existing sensitive data rule.
+  rpc DeleteSensitiveDataRule(DeleteSensitiveDataRuleRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/api/v1/sensitive-level/rules/{name=sensitiveDataRules/*}"
+    };
+  }
+
+  // ListSensitiveDataFields returns a list of sensitive data fields.
+  rpc ListSensitiveDataFields(ListSensitiveDataFieldsRequest) returns (ListSensitiveDataFieldsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/sensitive-level/fields"
+    };
+  }
+}
+
+// ListSensitiveDataRulesRequest is the request message for ListSensitiveDataRules.
+message ListSensitiveDataRulesRequest {
+  // The parent resource name, e.g., "workspaces/{workspace}".
+  string parent = 1;
+  // The filter to apply to the list.
+  string filter = 2;
+  // The maximum number of items to return.
+  int32 page_size = 3;
+  // The next_page_token value returned from a previous List request, if any.
+  string page_token = 4;
+}
+
+// ListSensitiveDataRulesResponse is the response message for ListSensitiveDataRules.
+message ListSensitiveDataRulesResponse {
+  // The list of sensitive data rules.
+  repeated SensitiveDataRule rules = 1;
+  // The token to retrieve the next page of results, or empty if there are no more results.
+  string next_page_token = 2;
+}
+
+// GetSensitiveDataRuleRequest is the request message for GetSensitiveDataRule.
+message GetSensitiveDataRuleRequest {
+  // The name of the sensitive data rule to retrieve, e.g., "sensitiveDataRules/{rule}".
+  string name = 1;
+}
+
+// GetSensitiveDataRuleResponse is the response message for GetSensitiveDataRule.
+message GetSensitiveDataRuleResponse {
+  // The sensitive data rule.
+  SensitiveDataRule rule = 1;
+}
+
+// CreateSensitiveDataRuleRequest is the request message for CreateSensitiveDataRule.
+message CreateSensitiveDataRuleRequest {
+  // The parent resource name, e.g., "workspaces/{workspace}".
+  string parent = 1;
+  // The sensitive data rule to create.
+  SensitiveDataRule rule = 2;
+}
+
+// CreateSensitiveDataRuleResponse is the response message for CreateSensitiveDataRule.
+message CreateSensitiveDataRuleResponse {
+  // The created sensitive data rule.
+  SensitiveDataRule rule = 1;
+}
+
+// UpdateSensitiveDataRuleRequest is the request message for UpdateSensitiveDataRule.
+message UpdateSensitiveDataRuleRequest {
+  // The sensitive data rule to update.
+  SensitiveDataRule rule = 1;
+  // The list of fields to update.
+  repeated string update_mask = 2;
+}
+
+// UpdateSensitiveDataRuleResponse is the response message for UpdateSensitiveDataRule.
+message UpdateSensitiveDataRuleResponse {
+  // The updated sensitive data rule.
+  SensitiveDataRule rule = 1;
+}
+
+// DeleteSensitiveDataRuleRequest is the request message for DeleteSensitiveDataRule.
+message DeleteSensitiveDataRuleRequest {
+  // The name of the sensitive data rule to delete, e.g., "sensitiveDataRules/{rule}".
+  string name = 1;
+}
+
+// ListSensitiveDataFieldsRequest is the request message for ListSensitiveDataFields.
+message ListSensitiveDataFieldsRequest {
+  // The parent resource name, e.g., "workspaces/{workspace}".
+  string parent = 1;
+  // The filter to apply to the list.
+  string filter = 2;
+  // The maximum number of items to return.
+  int32 page_size = 3;
+  // The next_page_token value returned from a previous List request, if any.
+  string page_token = 4;
+}
+
+// ListSensitiveDataFieldsResponse is the response message for ListSensitiveDataFields.
+message ListSensitiveDataFieldsResponse {
+  // The list of sensitive data fields.
+  repeated SensitiveDataField fields = 1;
+  // The token to retrieve the next page of results, or empty if there are no more results.
+  string next_page_token = 2;
+}
+
+// SensitiveDataRule represents a rule for identifying sensitive data.
+message SensitiveDataRule {
+  // The name of the sensitive data rule, e.g., "sensitiveDataRules/{rule}".
+  string name = 1;
+  // The title of the sensitive data rule.
+  string title = 2;
+  // The description of the sensitive data rule.
+  string description = 3;
+  // The sensitivity level of the data identified by this rule.
+  SensitiveDataLevel level = 4;
+  // The database type this rule applies to (e.g., MYSQL, POSTGRES).
+  string database_type = 5;
+  // The table name pattern this rule applies to (supports wildcards).
+  string table_pattern = 6;
+  // The column name pattern this rule applies to (supports wildcards).
+  string column_pattern = 7;
+  // The data type this rule applies to (e.g., VARCHAR, INT).
+  string data_type = 8;
+  // The regular expression used to match sensitive data.
+  string regex_pattern = 9;
+  // Whether this rule is enabled.
+  bool enabled = 10;
+  // Output only. The time this rule was created.
+  Time create_time = 11;
+  // Output only. The time this rule was last updated.
+  Time update_time = 12;
+}
+
+// SensitiveDataField represents a field that contains sensitive data.
+message SensitiveDataField {
+  // The name of the sensitive data field, e.g., "sensitiveDataFields/{field}".
+  string name = 1;
+  // The ID of the database table this field belongs to.
+  string table_id = 2;
+  // The name of the database table this field belongs to.
+  string table_name = 3;
+  // The name of the field that contains sensitive data.
+  string field_name = 4;
+  // The sensitivity level of the data in this field.
+  SensitiveDataLevel level = 5;
+  // The ID of the rule that identified this sensitive field.
+  string rule_id = 6;
+}
+
+// SensitiveDataLevel represents the sensitivity level of data.
+enum SensitiveDataLevel {
+  SENSITIVE_DATA_LEVEL_UNSPECIFIED = 0;
+  // Low sensitivity data, no approval required.
+  LOW = 1;
+  // Medium sensitivity data, 1 level approval required.
+  MEDIUM = 2;
+  // High sensitivity data, 2 level approval required.
+  HIGH = 3;
+}
